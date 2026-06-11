@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vetores em Java — Aula Completa</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:ital,wght@0,400;0,500;0,700;1,400&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:        #F7F8FC;
+  --bg2:       #EDEEF6;
+  --grid:      #D4DBF2;
+  --border:    #C8D2EC;
+  --indigo:    #2D3FC7;
+  --indigo-lt: #EEF0FB;
+  --orange:    #E8600A;
+  --orange-lt: #FEF0E7;
+  --green:     #1A7A4A;
+  --green-lt:  #E8F5EE;
+  --ink:       #1A1A2E;
+  --ink2:      #3D3D5C;
+  --ink3:      #7A7A9A;
+  --ink4:      #B0B0C8;
+  --mono:      'JetBrains Mono', monospace;
+  --body:      'IBM Plex Sans', sans-serif;
+  --display:   'Space Grotesk', sans-serif;
+  --r:         6px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 15px;
+  line-height: 1.75;
+  min-height: 100vh;
+}
+
+/* ─── Grid paper background ─── */
+body::before {
+  content: '';
+  position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 32px 32px;
+  opacity: .45;
+}
+
+.page {
+  position: relative; z-index: 1;
+  max-width: 960px; margin: 0 auto;
+  padding: 0 2rem 6rem;
+}
+
+/* ─── HERO ─── */
+.hero {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 2rem;
+  align-items: end;
+  padding: 4rem 0 3rem;
+  border-bottom: 2px solid var(--indigo);
+  margin-bottom: 3rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-bracket {
+  position: absolute;
+  font-family: var(--mono);
+  font-size: clamp(140px, 22vw, 240px);
+  font-weight: 700;
+  color: var(--indigo);
+  opacity: .06;
+  line-height: 1;
+  right: -20px;
+  top: -10px;
+  user-select: none;
+  letter-spacing: -.05em;
+}
+
+.hero-eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: var(--mono); font-size: 11px; font-weight: 500;
+  letter-spacing: .14em; text-transform: uppercase;
+  color: var(--indigo);
+  background: var(--indigo-lt);
+  border: 1px solid #C5CBEF;
+  border-radius: 4px;
+  padding: 4px 12px;
+  margin-bottom: 1.25rem;
+}
+.hero-eyebrow::before { content: '[ ]'; opacity: .5; }
+
+.hero h1 {
+  font-family: var(--display);
+  font-size: clamp(2.4rem, 5.5vw, 4rem);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -.03em;
+  color: var(--ink);
+  margin-bottom: .75rem;
+}
+.hero h1 em {
+  font-style: normal;
+  color: var(--indigo);
+}
+.hero-desc {
+  font-size: 15px; color: var(--ink2); font-weight: 300; max-width: 520px;
+  line-height: 1.7;
+}
+
+.hero-meta {
+  display: flex; flex-direction: column; gap: 8px; align-items: flex-end;
+  flex-shrink: 0;
+}
+.meta-chip {
+  font-family: var(--mono); font-size: 12px; color: var(--ink3);
+  display: flex; align-items: center; gap: 6px;
+}
+.meta-chip b { color: var(--ink); font-weight: 500; }
+
+/* ─── TOC ─── */
+.toc {
+  background: white;
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--indigo);
+  border-radius: 0 var(--r) var(--r) 0;
+  padding: 1.5rem 1.75rem;
+  margin-bottom: 3rem;
+}
+.toc-title {
+  font-family: var(--display); font-size: 12px; font-weight: 600;
+  letter-spacing: .1em; text-transform: uppercase; color: var(--indigo);
+  margin-bottom: .75rem;
+}
+.toc-list { list-style: none; display: flex; flex-direction: column; gap: 4px; }
+.toc-list li a {
+  font-family: var(--mono); font-size: 13px; color: var(--ink2);
+  text-decoration: none; display: flex; align-items: center; gap: 10px;
+  transition: color .15s;
+}
+.toc-list li a:hover { color: var(--indigo); }
+.toc-list li a::before {
+  content: attr(data-n);
+  font-size: 10px; color: var(--ink4); min-width: 28px;
+}
+
+/* ─── SECTION LABEL ─── */
+.sec-label {
+  display: flex; align-items: center; gap: 12px;
+  margin-top: 3.5rem; margin-bottom: 1.75rem;
+}
+.sec-num {
+  font-family: var(--mono); font-size: 11px; font-weight: 700;
+  color: white; background: var(--indigo);
+  width: 28px; height: 28px; border-radius: 4px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.sec-label h2 {
+  font-family: var(--display); font-size: 1.35rem; font-weight: 600;
+  color: var(--ink); letter-spacing: -.01em;
+}
+.sec-label::after {
+  content: ''; flex: 1; height: 1px; background: var(--border);
+}
+
+/* ─── PROSE ─── */
+.prose { max-width: 720px; }
+.prose p { margin-bottom: 1rem; color: var(--ink2); font-weight: 300; }
+.prose p strong { font-weight: 500; color: var(--ink); }
+.prose code {
+  font-family: var(--mono); font-size: 13px;
+  background: var(--indigo-lt); color: var(--indigo);
+  border: 1px solid #C5CBEF;
+  border-radius: 3px; padding: 1px 5px;
+}
+
+/* ─── ARRAY VISUAL ─── */
+.array-visual {
+  display: flex; align-items: stretch; gap: 0;
+  margin: 1.75rem 0;
+  font-family: var(--mono);
+  overflow-x: auto;
+}
+.av-bracket {
+  font-size: 52px; color: var(--indigo); line-height: 1;
+  display: flex; align-items: center; padding: 0 4px;
+  opacity: .7;
+}
+.av-cells { display: flex; }
+.av-cell { display: flex; flex-direction: column; align-items: center; }
+.av-box {
+  width: 60px; height: 56px;
+  background: white;
+  border: 2px solid var(--indigo);
+  border-right-width: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; font-weight: 600; color: var(--ink);
+  position: relative;
+}
+.av-cell:last-child .av-box { border-right-width: 2px; }
+.av-box.highlight { background: var(--indigo-lt); color: var(--indigo); }
+.av-box.empty { color: var(--ink4); font-style: italic; font-size: 12px; }
+.av-idx {
+  font-size: 10px; color: var(--indigo); margin-top: 5px;
+  font-weight: 500;
+}
+.av-label {
+  font-size: 10px; color: var(--ink4); margin-top: 2px;
+}
+
+/* ─── CODE BLOCK ─── */
+.code-wrap {
+  background: #1A1A2E;
+  border-radius: var(--r);
+  border: 1px solid #2D2D4E;
+  overflow: hidden;
+  margin: 1.25rem 0;
+}
+.code-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 16px;
+  background: #14142A;
+  border-bottom: 1px solid #2D2D4E;
+}
+.code-lang {
+  font-family: var(--mono); font-size: 10px; font-weight: 500;
+  letter-spacing: .12em; text-transform: uppercase;
+  color: #6B6B9A;
+}
+.code-copy {
+  font-family: var(--mono); font-size: 10px; color: #6B6B9A;
+  background: transparent; border: 1px solid #2D2D4E;
+  border-radius: 3px; padding: 2px 8px; cursor: pointer;
+  transition: all .15s;
+}
+.code-copy:hover { color: #A0A0C8; border-color: #4040A0; }
+.code-copy.copied { color: #3dd6a3; border-color: #1A7A4A; }
+pre.code {
+  font-family: var(--mono);
+  font-size: 13.5px;
+  line-height: 1.75;
+  padding: 1.25rem 1.5rem;
+  overflow-x: auto;
+  color: #C4C0E0;
+  margin: 0;
+  white-space: pre;
+}
+/* syntax */
+.kw  { color: #7B95F5; }
+.tp  { color: #C7A9F5; }
+.str { color: #66D9B0; }
+.num { color: #F5C842; }
+.cm  { color: #4A4870; font-style: italic; }
+.fn  { color: #62C4F5; }
+.ann { color: #F5A642; }
+
+/* ─── CONCEPT CARDS ─── */
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px,1fr)); gap: 12px; margin: 1.5rem 0; }
+.ccard {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 1rem 1.25rem;
+}
+.ccard-icon { font-size: 22px; margin-bottom: 8px; }
+.ccard-title { font-family: var(--display); font-size: 14px; font-weight: 600; color: var(--ink); margin-bottom: 4px; }
+.ccard-desc { font-size: 13px; color: var(--ink2); font-weight: 300; }
+.ccard-code {
+  font-family: var(--mono); font-size: 12px;
+  color: var(--indigo); margin-top: 8px;
+  background: var(--indigo-lt); padding: 4px 8px; border-radius: 3px;
+}
+
+/* ─── CALLOUT ─── */
+.callout {
+  display: flex; gap: 14px;
+  border-radius: var(--r);
+  padding: 1rem 1.25rem;
+  margin: 1.25rem 0;
+  border: 1px solid;
+}
+.callout-warn  { background: var(--orange-lt); border-color: #F5BF9A; }
+.callout-info  { background: var(--indigo-lt); border-color: #C5CBEF; }
+.callout-tip   { background: var(--green-lt);  border-color: #A5D9B0; }
+.callout-icon  { font-size: 18px; flex-shrink: 0; margin-top: 2px; }
+.callout-body  { font-size: 13.5px; color: var(--ink2); font-weight: 300; }
+.callout-body strong { font-weight: 500; color: var(--ink); }
+.callout-body code {
+  font-family: var(--mono); font-size: 12px;
+  background: rgba(255,255,255,.7);
+  padding: 1px 5px; border-radius: 3px;
+}
+
+/* ─── TABLE ─── */
+.tbl-wrap { overflow-x: auto; margin: 1.25rem 0; }
+table.data {
+  width: 100%; border-collapse: collapse;
+  font-size: 13.5px;
+}
+table.data th {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .1em;
+  text-transform: uppercase; color: white; background: var(--indigo);
+  padding: 9px 14px; text-align: left;
+}
+table.data td {
+  padding: 9px 14px; border-bottom: 1px solid var(--border);
+  color: var(--ink2); vertical-align: top;
+}
+table.data td code {
+  font-family: var(--mono); font-size: 12px;
+  color: var(--indigo); background: var(--indigo-lt);
+  padding: 1px 5px; border-radius: 3px;
+}
+table.data tr:hover td { background: #F0F2FC; }
+
+/* ─── TOPIC LIST ─── */
+.topic-list { list-style: none; display: flex; flex-direction: column; gap: 8px; margin: 1rem 0; }
+.topic-list li {
+  display: flex; align-items: flex-start; gap: 12px;
+  font-size: 14px; color: var(--ink2); font-weight: 300;
+}
+.topic-list li::before {
+  content: '▸';
+  color: var(--indigo); flex-shrink: 0; font-family: var(--mono);
+  margin-top: 2px;
+}
+
+/* ─── TIMELINE ─── */
+.timeline { position: relative; padding-left: 2rem; margin: 1.5rem 0; }
+.timeline::before {
+  content: ''; position: absolute; left: 7px; top: 8px;
+  bottom: 8px; width: 2px; background: var(--border);
+}
+.tl-item { position: relative; margin-bottom: 1.5rem; }
+.tl-item::before {
+  content: '';
+  position: absolute; left: -1.65rem; top: 7px;
+  width: 10px; height: 10px; border-radius: 50%;
+  background: white; border: 2px solid var(--indigo);
+}
+.tl-head {
+  font-family: var(--display); font-size: 14px; font-weight: 600;
+  color: var(--ink); margin-bottom: 4px;
+}
+.tl-time {
+  font-family: var(--mono); font-size: 11px; color: var(--indigo);
+  background: var(--indigo-lt); border-radius: 3px; padding: 1px 7px;
+  display: inline-block; margin-bottom: 4px;
+}
+.tl-body { font-size: 13.5px; color: var(--ink2); font-weight: 300; }
+
+/* ─── FOOTER ─── */
+.footer {
+  margin-top: 5rem; padding: 1.5rem 0;
+  border-top: 1px solid var(--border);
+  display: flex; justify-content: space-between; align-items: center;
+  flex-wrap: wrap; gap: 12px;
+  font-family: var(--mono); font-size: 11px; color: var(--ink4);
+}
+
+@media (max-width: 640px) {
+  .hero { grid-template-columns: 1fr; }
+  .hero-meta { align-items: flex-start; flex-direction: row; flex-wrap: wrap; }
+  .page { padding: 0 1.2rem 4rem; }
+}
+@media print {
+  body::before { display: none; }
+  .code-copy { display: none; }
+  .code-wrap { border: 1px solid #CCC; background: #F4F4F4; }
+  pre.code { color: #111; }
+  .kw,.tp,.fn,.ann { color: #1A1A9E; }
+  .str { color: #0F6E56; }
+  .num { color: #8B5E00; }
+  .cm { color: #888; }
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+<!-- ════ HERO ════ -->
+<header class="hero">
+  <div>
+    <div class="hero-eyebrow">Programação Java · Iniciantes</div>
+    <h1>Vetores<br>em <em>Java</em></h1>
+    <p class="hero-desc">Declaração, inicialização, acesso por índice, iteração com <code style="font-family:var(--mono);font-size:13px;background:rgba(45,63,199,.1);color:var(--indigo);padding:1px 6px;border-radius:3px">for</code>, operações clássicas e as armadilhas mais comuns.</p>
+  </div>
+  <div class="hero-meta">
+    <div class="meta-chip"><b>Duração</b> 4 horas</div>
+    <div class="meta-chip"><b>Nível</b> Iniciante</div>
+    <div class="meta-chip"><b>Pré-req.</b> for, if/else</div>
+  </div>
+  <div class="hero-bracket">[]</div>
+</header>
+
+<!-- ════ TOC ════ -->
+<nav class="toc">
+  <div class="toc-title">Conteúdo da aula</div>
+  <ul class="toc-list">
+    <li><a href="#s1" data-n="01">O que é um vetor?</a></li>
+    <li><a href="#s2" data-n="02">Declaração e inicialização</a></li>
+    <li><a href="#s3" data-n="03">Acesso e modificação de elementos</a></li>
+    <li><a href="#s4" data-n="04">Percorrendo com for</a></li>
+    <li><a href="#s5" data-n="05">Operações clássicas</a></li>
+    <li><a href="#s6" data-n="06">Vetores multidimensionais (matrizes)</a></li>
+    <li><a href="#s7" data-n="07">Erros comuns e boas práticas</a></li>
+    <li><a href="#s8" data-n="08">Cronograma da aula</a></li>
+  </ul>
+</nav>
+
+<!-- ════ 1 — O QUE É ════ -->
+<section id="s1">
+  <div class="sec-label">
+    <div class="sec-num">01</div>
+    <h2>O que é um vetor?</h2>
+  </div>
+  <div class="prose">
+    <p>Um <strong>vetor</strong> (ou <em>array</em>) é uma estrutura de dados que armazena uma sequência de valores do mesmo tipo, em posições contíguas de memória. Cada posição é identificada por um <strong>índice</strong>, que começa sempre em <code>0</code>.</p>
+    <p>Imagine um bloco de gavetas numeradas: você não pode pular uma gaveta, e sabe exatamente em qual delas cada item está guardado.</p>
+  </div>
+
+  <!-- Visualização de array -->
+  <div class="array-visual">
+    <div class="av-bracket">[</div>
+    <div class="av-cells" id="av-demo"></div>
+    <div class="av-bracket">]</div>
+  </div>
+
+  <div class="cards">
+    <div class="ccard">
+      <div class="ccard-icon">📏</div>
+      <div class="ccard-title">Tamanho fixo</div>
+      <div class="ccard-desc">Uma vez criado, o tamanho do vetor não pode ser alterado.</div>
+      <div class="ccard-code">int[] v = new int[5];</div>
+    </div>
+    <div class="ccard">
+      <div class="ccard-icon">🔢</div>
+      <div class="ccard-title">Mesmo tipo</div>
+      <div class="ccard-desc">Todos os elementos devem ser do mesmo tipo declarado.</div>
+      <div class="ccard-code">double[] notas = ...;</div>
+    </div>
+    <div class="ccard">
+      <div class="ccard-icon">0️⃣</div>
+      <div class="ccard-title">Índice começa em 0</div>
+      <div class="ccard-desc">O primeiro elemento é sempre <code style="font-family:var(--mono);font-size:12px">v[0]</code>, não <code style="font-family:var(--mono);font-size:12px">v[1]</code>.</div>
+      <div class="ccard-code">v[0], v[1], ... v[n-1]</div>
+    </div>
+    <div class="ccard">
+      <div class="ccard-icon">⚡</div>
+      <div class="ccard-title">Acesso O(1)</div>
+      <div class="ccard-desc">Qualquer posição é acessada diretamente, sem varrer o vetor.</div>
+      <div class="ccard-code">v[42]; // imediato</div>
+    </div>
+  </div>
+</section>
+
+<!-- ════ 2 — DECLARAÇÃO ════ -->
+<section id="s2">
+  <div class="sec-label">
+    <div class="sec-num">02</div>
+    <h2>Declaração e inicialização</h2>
+  </div>
+  <div class="prose">
+    <p>Em Java há três formas principais de criar um vetor:</p>
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-head"><span class="code-lang">Java</span><button class="code-copy" onclick="copyCode(this)">copiar</button></div>
+    <pre class="code"><span class="cm">// Forma 1 — declarar e alocar depois</span>
+<span class="tp">int</span>[] idades;                      <span class="cm">// declara a referência</span>
+idades = <span class="kw">new</span> <span class="tp">int</span>[<span class="num">5</span>];               <span class="cm">// aloca 5 posições (valores padrão: 0)</span>
+
+<span class="cm">// Forma 2 — declarar e alocar na mesma linha</span>
+<span class="tp">double</span>[] notas = <span class="kw">new</span> <span class="tp">double</span>[<span class="num">4</span>];    <span class="cm">// valores padrão: 0.0</span>
+<span class="tp">boolean</span>[] flags = <span class="kw">new</span> <span class="tp">boolean</span>[<span class="num">3</span>]; <span class="cm">// valores padrão: false</span>
+<span class="tp">String</span>[] nomes = <span class="kw">new</span> <span class="tp">String</span>[<span class="num">2</span>];   <span class="cm">// valores padrão: null</span>
+
+<span class="cm">// Forma 3 — inicialização literal (tamanho inferido)</span>
+<span class="tp">int</span>[] pares = { <span class="num">2</span>, <span class="num">4</span>, <span class="num">6</span>, <span class="num">8</span>, <span class="num">10</span> };
+<span class="tp">String</span>[] dias = { <span class="str">"Seg"</span>, <span class="str">"Ter"</span>, <span class="str">"Qua"</span>, <span class="str">"Qui"</span>, <span class="str">"Sex"</span> };
+
+<span class="cm">// Obtendo o tamanho</span>
+<span class="fn">System.out.println</span>(pares.length);  <span class="cm">// 5  (propriedade, não método!)</span></pre>
+  </div>
+
+  <div class="callout callout-warn">
+    <div class="callout-icon">⚠️</div>
+    <div class="callout-body"><strong>Atenção:</strong> <code>length</code> é uma <em>propriedade</em>, não um método. Escreva <code>v.length</code>, nunca <code>v.length()</code> — isso causa erro de compilação.</div>
+  </div>
+
+  <div class="tbl-wrap">
+    <table class="data">
+      <thead><tr><th>Tipo</th><th>Valor padrão</th><th>Exemplo</th></tr></thead>
+      <tbody>
+        <tr><td><code>int</code>, <code>long</code>, <code>byte</code></td><td><code>0</code></td><td><code>int[] v = new int[3]; // [0,0,0]</code></td></tr>
+        <tr><td><code>double</code>, <code>float</code></td><td><code>0.0</code></td><td><code>double[] d = new double[2]; // [0.0,0.0]</code></td></tr>
+        <tr><td><code>boolean</code></td><td><code>false</code></td><td><code>boolean[] b = new boolean[2];</code></td></tr>
+        <tr><td><code>char</code></td><td><code>'\u0000'</code></td><td><code>char[] c = new char[2];</code></td></tr>
+        <tr><td><code>String</code> / objetos</td><td><code>null</code></td><td><code>String[] s = new String[2];</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ════ 3 — ACESSO ════ -->
+<section id="s3">
+  <div class="sec-label">
+    <div class="sec-num">03</div>
+    <h2>Acesso e modificação de elementos</h2>
+  </div>
+  <div class="prose">
+    <p>Cada elemento é acessado pelo índice entre colchetes. O índice válido vai de <code>0</code> até <code>length - 1</code>. Tentar acessar fora desse intervalo lança uma <code>ArrayIndexOutOfBoundsException</code>.</p>
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-head"><span class="code-lang">Java</span><button class="code-copy" onclick="copyCode(this)">copiar</button></div>
+    <pre class="code"><span class="tp">int</span>[] v = { <span class="num">10</span>, <span class="num">20</span>, <span class="num">30</span>, <span class="num">40</span>, <span class="num">50</span> };
+<span class="cm">//          [0]  [1]  [2]  [3]  [4]</span>
+
+<span class="cm">// Leitura</span>
+<span class="fn">System.out.println</span>(v[<span class="num">0</span>]);   <span class="cm">// 10</span>
+<span class="fn">System.out.println</span>(v[<span class="num">4</span>]);   <span class="cm">// 50  (último elemento)</span>
+
+<span class="cm">// Modificação</span>
+v[<span class="num">2</span>] = <span class="num">99</span>;
+<span class="fn">System.out.println</span>(v[<span class="num">2</span>]);   <span class="cm">// 99</span>
+
+<span class="cm">// ❌ Erro — índice fora do intervalo</span>
+<span class="fn">System.out.println</span>(v[<span class="num">5</span>]);   <span class="cm">// ArrayIndexOutOfBoundsException!</span>
+
+<span class="cm">// ✅ Índice do último elemento: v.length - 1</span>
+<span class="fn">System.out.println</span>(v[v.length - <span class="num">1</span>]);  <span class="cm">// 50</span></pre>
+  </div>
+
+  <div class="callout callout-info">
+    <div class="callout-icon">💡</div>
+    <div class="callout-body"><strong>Regra de ouro:</strong> índice válido é sempre <code>0 ≤ i &lt; v.length</code>. Guarde isso — é a causa número 1 de erros em vetores.</div>
+  </div>
+</section>
+
+<!-- ════ 4 — FOR ════ -->
+<section id="s4">
+  <div class="sec-label">
+    <div class="sec-num">04</div>
+    <h2>Percorrendo com for</h2>
+  </div>
+  <div class="prose">
+    <p>O laço <code>for</code> e vetores foram feitos um para o outro. Há duas variantes: o <strong>for indexado</strong> (quando você precisa do índice) e o <strong>for-each</strong> (quando só precisa do valor).</p>
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-head"><span class="code-lang">Java — for indexado</span><button class="code-copy" onclick="copyCode(this)">copiar</button></div>
+    <pre class="code"><span class="tp">int</span>[] notas = { <span class="num">7</span>, <span class="num">8</span>, <span class="num">9</span>, <span class="num">6</span>, <span class="num">10</span> };
+
+<span class="cm">// Leitura com índice</span>
+<span class="kw">for</span> (<span class="tp">int</span> i = <span class="num">0</span>; i &lt; notas.length; i++) {
+    <span class="fn">System.out.println</span>(<span class="str">"notas["</span> + i + <span class="str">"] = "</span> + notas[i]);
+}
+
+<span class="cm">// Modificação — só possível com for indexado</span>
+<span class="kw">for</span> (<span class="tp">int</span> i = <span class="num">0</span>; i &lt; notas.length; i++) {
+    notas[i] = notas[i] + <span class="num">1</span>;   <span class="cm">// bônus de 1 ponto</span>
+}
+
+<span class="cm">// Percorrer de trás para frente</span>
+<span class="kw">for</span> (<span class="tp">int</span> i = notas.length - <span class="num">1</span>; i >= <span class="num">0</span>; i--) {
+    <span class="fn">System.out.print</span>(notas[i] + <span class="str">" "</span>);   <span class="cm">// 11 10 10 9 8</span>
+}</pre>
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-head"><span class="code-lang">Java — for-each (enhanced for)</span><button class="code-copy" onclick="copyCode(this)">copiar</button></div>
+    <pre class="code"><span class="tp">String</span>[] frutas = { <span class="str">"Maçã"</span>, <span class="str">"Banana"</span>, <span class="str">"Laranja"</span> };
+
+<span class="cm">// For-each: sintaxe limpa quando não precisa do índice</span>
+<span class="kw">for</span> (<span class="tp">String</span> fruta : frutas) {
+    <span class="fn">System.out.println</span>(fruta);
+}
+
+<span class="cm">// ⚠ For-each NÃO modifica o vetor original</span>
+<span class="kw">for</span> (<span class="tp">int</span> n : notas) {
+    n = n + <span class="num">1</span>;   <span class="cm">// modifica cópia local, não o vetor!</span>
+}</pre>
+  </div>
+
+  <div class="tbl-wrap">
+    <table class="data">
+      <thead><tr><th>Situação</th><th>Use</th></tr></thead>
+      <tbody>
+        <tr><td>Só precisa ler os valores</td><td><code>for-each</code></td></tr>
+        <tr><td>Precisa do índice ou quer modificar</td><td><code>for indexado</code></td></tr>
+        <tr><td>Percorrer de trás para frente</td><td><code>for indexado</code> decrescente</td></tr>
+        <tr><td>Percorrer dois vetores ao mesmo tempo</td><td><code>for indexado</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ════ 5 — OPERAÇÕES ════ -->
+<section id="s5">
+  <div class="sec-label">
+    <div class="sec-num">05</div>
+    <h2>Operações clássicas</h2>
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-head"><span class="code-lang">Java — soma, média, maior, menor</span><button class="code-copy" onclick="copyCode(this)">copiar</button></div>
+    <pre class="code"><span class="tp">int</span>[] v = { <span class="num">4</span>, <span class="num">7</span>, <span class="num">2</span>, <span class="num">9</span>, <span class="num">5</span> };
+
+<span class="cm">// Soma</span>
+<span class="tp">int</span> soma = <span class="num">0</span>;
+<span class="kw">for</span> (<span class="tp">int</span> n : v) soma += n;
+<span class="fn">System.out.println</span>(<span class="str">"Soma: "</span> + soma);              <span class="cm">// 27</span>
+
+<span class="cm">// Média</span>
+<span class="tp">double</span> media = (<span class="tp">double</span>) soma / v.length;
+<span class="fn">System.out.println</span>(<span class="str">"Média: "</span> + media);           <span class="cm">// 5.4</span>
+
+<span class="cm">// Maior elemento</span>
+<span class="tp">int</span> maior = v[<span class="num">0</span>];
+<span class="kw">for</span> (<span class="tp">int</span> i = <span class="num">1</span>; i &lt; v.length; i++) {
+    <span class="kw">if</span> (v[i] > maior) maior = v[i];
+}
+<span class="fn">System.out.println</span>(<span class="str">"Maior: "</span> + maior);           <span class="cm">// 9</span>
+
+<span class="cm">// Menor elemento</span>
+<span class="tp">int</span> menor = v[<span class="num">0</span>];
+<span class="kw">for</span> (<span class="tp">int</span> i = <span class="num">1</span>; i &lt; v.length; i++) {
+    <span class="kw">if</span> (v[i] &lt; menor) menor = v[i];
+}
+<span class="fn">System.out.println</span>(<span class="str">"Menor: "</span> + menor);           <span class="cm">// 2</span>
+
+<span class="cm">// Busca linear (retorna índice ou -1)</span>
+<span class="tp">int</span> alvo = <span class="num">9</span>, posicao = -<span class="num">1</span>;
+<span class="kw">for</span> (<span class="tp">int</span> i = <span class="num">0</span>; i &lt; v.length; i++) {
+    <span class="kw">if</span> (v[i] == alvo) { posicao = i; <span class="kw">break</span>; }
+}
+<span class="fn">System.out.println</span>(<span class="str">"Posição do "</span> + alvo + <span class="str">": "</span> + posicao); <span class="cm">// 3</span>
+
+<span class="cm">// Contar elementos que satisfazem condição</span>
+<span class="tp">int</span> pares = <span class="num">0</span>;
+<span class="kw">for</span> (<span class="tp">int</span> n : v) <span class="kw">if</span> (n % <span class="num">2</span> == <span class="num">0</span>) pares++;
+<span class="fn">System.out.println</span>(<span class="str">"Pares: "</span> + pares);           <span class="cm">// 1</span></pre>
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-head"><span class="code-lang">Java — copiar e inverter vetor</span><button class="code-copy" onclick="copyCode(this)">copiar</button></div>
+    <pre class="code"><span class="tp">int</span>[] original = { <span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>, <span class="num">5</span> };
+
+<span class="cm">// ❌ ERRADO — ambos apontam para o mesmo vetor</span>
+<span class="tp">int</span>[] errado = original;
+errado[<span class="num">0</span>] = <span class="num">99</span>;  <span class="cm">// original[0] também vira 99!</span>
+
+<span class="cm">// ✅ CORRETO — copiar elemento por elemento</span>
+<span class="tp">int</span>[] copia = <span class="kw">new</span> <span class="tp">int</span>[original.length];
+<span class="kw">for</span> (<span class="tp">int</span> i = <span class="num">0</span>; i &lt; original.length; i++) {
+    copia[i] = original[i];
+}
+
+<span class="cm">// Inverter vetor</span>
+<span class="tp">int</span>[] invertido = <span class="kw">new</span> <span class="tp">int</span>[original.length];
+<span class="kw">for</span> (<span class="tp">int</span> i = <span class="num">0</span>; i &lt; original.length; i++) {
+    invertido[i] = original[original.length - <span class="num">1</span> - i];
+}
+<span class="cm">// invertido = { 5, 4, 3, 2, 1 }</span></pre>
+  </div>
+
+  <div class="callout callout-tip">
+    <div class="callout-icon">✅</div>
+    <div class="callout-body"><strong>Dica:</strong> A classe <code>Arrays</code> oferece métodos prontos como <code>Arrays.copyOf(v, n)</code>, <code>Arrays.sort(v)</code> e <code>Arrays.fill(v, valor)</code>. Importe com <code>import java.util.Arrays;</code>.</div>
+  </div>
+</section>
+
+<!-- ════ 6 — MATRIZES ════ -->
+<section id="s6">
+  <div class="sec-label">
+    <div class="sec-num">06</div>
+    <h2>Vetores multidimensionais (matrizes)</h2>
+  </div>
+  <div class="prose">
+    <p>Uma <strong>matriz</strong> em Java é um <em>vetor de vetores</em>. O caso mais comum é a matriz bidimensional, usada para representar tabelas, grades e tabuleiros.</p>
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-head"><span class="code-lang">Java — matriz 2D</span><button class="code-copy" onclick="copyCode(this)">copiar</button></div>
+    <pre class="code"><span class="cm">// Declaração e alocação: 3 linhas × 4 colunas</span>
+<span class="tp">int</span>[][] matriz = <span class="kw">new</span> <span class="tp">int</span>[<span class="num">3</span>][<span class="num">4</span>];
+
+<span class="cm">// Inicialização literal</span>
+<span class="tp">int</span>[][] tabela = {
+    { <span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span> },
+    { <span class="num">4</span>, <span class="num">5</span>, <span class="num">6</span> },
+    { <span class="num">7</span>, <span class="num">8</span>, <span class="num">9</span> }
+};
+
+<span class="cm">// Acesso: tabela[linha][coluna]</span>
+<span class="fn">System.out.println</span>(tabela[<span class="num">1</span>][<span class="num">2</span>]);  <span class="cm">// 6 (linha 1, coluna 2)</span>
+
+<span class="cm">// Percorrer com for duplo</span>
+<span class="kw">for</span> (<span class="tp">int</span> i = <span class="num">0</span>; i &lt; tabela.length; i++) {
+    <span class="kw">for</span> (<span class="tp">int</span> j = <span class="num">0</span>; j &lt; tabela[i].length; j++) {
+        <span class="fn">System.out.print</span>(tabela[i][j] + <span class="str">"\t"</span>);
+    }
+    <span class="fn">System.out.println</span>();
+}
+
+<span class="cm">// Dimensões</span>
+<span class="fn">System.out.println</span>(tabela.length);     <span class="cm">// 3 (linhas)</span>
+<span class="fn">System.out.println</span>(tabela[<span class="num">0</span>].length);  <span class="cm">// 3 (colunas da linha 0)</span></pre>
+  </div>
+</section>
+
+<!-- ════ 7 — ERROS ════ -->
+<section id="s7">
+  <div class="sec-label">
+    <div class="sec-num">07</div>
+    <h2>Erros comuns e boas práticas</h2>
+  </div>
+
+  <ul class="topic-list">
+    <li><strong>ArrayIndexOutOfBoundsException</strong> — acessar índice menor que 0 ou maior/igual a <code>length</code>.</li>
+    <li><strong>NullPointerException</strong> — declarar o vetor mas esquecer de criar com <code>new</code>.</li>
+    <li><strong>Off-by-one</strong> — usar <code>i &lt;= v.length</code> em vez de <code>i &lt; v.length</code>.</li>
+    <li><strong>Cópia por referência</strong> — usar <code>int[] b = a</code> acha que copia, mas ambos apontam para o mesmo vetor.</li>
+    <li><strong>Modificar no for-each</strong> — o for-each itera sobre cópias; para modificar, use o for indexado.</li>
+  </ul>
+
+  <div class="code-wrap">
+    <div class="code-head"><span class="code-lang">Java — erros frequentes</span><button class="code-copy" onclick="copyCode(this)">copiar</button></div>
+    <pre class="code"><span class="tp">int</span>[] v = <span class="kw">new</span> <span class="tp">int</span>[<span class="num">5</span>];
+
+<span class="cm">// ❌ Off-by-one</span>
+<span class="kw">for</span> (<span class="tp">int</span> i = <span class="num">0</span>; i &lt;= v.length; i++)   <span class="cm">// erro! <= dá AIOOBE</span>
+<span class="kw">for</span> (<span class="tp">int</span> i = <span class="num">0</span>; i &lt;  v.length; i++)   <span class="cm">// ✅ correto</span>
+
+<span class="cm">// ❌ Vetor não inicializado</span>
+<span class="tp">int</span>[] arr;
+arr[<span class="num">0</span>] = <span class="num">10</span>;   <span class="cm">// NullPointerException (esqueceu new)</span>
+
+<span class="cm">// ❌ "Cópia" errada</span>
+<span class="tp">int</span>[] a = { <span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span> };
+<span class="tp">int</span>[] b = a;     <span class="cm">// b aponta para o MESMO vetor</span>
+b[<span class="num">0</span>] = <span class="num">99</span>;      <span class="cm">// a[0] também vira 99!</span></pre>
+  </div>
+
+  <div class="callout callout-tip">
+    <div class="callout-icon">✅</div>
+    <div class="callout-body"><strong>Boas práticas:</strong> nomeie vetores no plural (<code>notas</code>, <code>idades</code>); use constante para tamanho se reutilizar (<code>final int N = 10</code>); sempre inicialize com <code>new</code> antes de usar.</div>
+  </div>
+</section>
+
+<!-- ════ 8 — CRONOGRAMA ════ -->
+<section id="s8">
+  <div class="sec-label">
+    <div class="sec-num">08</div>
+    <h2>Cronograma da aula</h2>
+  </div>
+  <div class="timeline" id="cronograma"></div>
+</section>
+
+<footer class="footer">
+  <span>Java para Iniciantes · Vetores (Arrays)</span>
+  <span id="footer-date"></span>
+</footer>
+</div>
+
+<script>
+// ── Array visual ──
+const cells = [10, 25, 7, 42, 3];
+const avDemo = document.getElementById("av-demo");
+cells.forEach((val, i) => {
+  avDemo.innerHTML += `
+    <div class="av-cell">
+      <div class="av-box${i===3?' highlight':''}">${val}</div>
+      <div class="av-idx">[${i}]</div>
+      <div class="av-label">${i===0?'início':i===cells.length-1?'fim':''}</div>
+    </div>`;
+});
+
+// ── Cronograma ──
+const crono = [
+  { head: "Abertura e o conceito de vetor", time: "0:00 – 0:30 · 30 min",
+    body: "O que é um array, analogia das gavetas numeradas, visualização, tipos e valores padrão." },
+  { head: "Declaração, inicialização e acesso", time: "0:30 – 1:10 · 40 min",
+    body: "Três formas de criar vetores, propriedade length, acesso por índice, ArrayIndexOutOfBoundsException. Exercícios 1–3." },
+  { head: "☕ Intervalo", time: "1:10 – 1:20 · 10 min", body: "" },
+  { head: "Percorrendo com for e for-each", time: "1:20 – 2:00 · 40 min",
+    body: "For indexado vs for-each, quando usar cada um, percorrer de trás pra frente. Exercícios 4–6." },
+  { head: "Operações clássicas", time: "2:00 – 2:50 · 50 min",
+    body: "Soma, média, maior, menor, busca linear, contar elementos, copiar e inverter. Exercícios 7–10." },
+  { head: "☕ Intervalo", time: "2:50 – 3:00 · 10 min", body: "" },
+  { head: "Matrizes bidimensionais", time: "3:00 – 3:30 · 30 min",
+    body: "Declaração, inicialização, acesso [i][j], for duplo. Exercício 11." },
+  { head: "Erros comuns, boas práticas e desafio final", time: "3:30 – 4:00 · 30 min",
+    body: "Off-by-one, cópia por referência, for-each vs indexado. Desafio: ordenação por seleção (exercício 12)." },
+];
+const tlEl = document.getElementById("cronograma");
+crono.forEach(c => {
+  tlEl.innerHTML += `<div class="tl-item">
+    <div class="tl-head">${c.head}</div>
+    <div class="tl-time">${c.time}</div>
+    ${c.body ? `<div class="tl-body">${c.body}</div>` : ''}
+  </div>`;
+});
+
+// ── Copy buttons ──
+function copyCode(btn) {
+  const pre = btn.closest('.code-wrap').querySelector('pre');
+  navigator.clipboard.writeText(pre.innerText).then(() => {
+    btn.textContent = 'copiado!'; btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'copiar'; btn.classList.remove('copied'); }, 1800);
+  });
+}
+
+document.getElementById("footer-date").textContent =
+  new Date().toLocaleDateString("pt-BR", { year:"numeric", month:"long", day:"numeric" });
+</script>
+</body>
+</html>

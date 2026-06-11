@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Exercícios — Vetores em Java</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:ital,wght@0,400;0,500;0,700;1,400&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:        #F7F8FC;
+  --bg2:       #EDEEF6;
+  --grid:      #D4DBF2;
+  --border:    #C8D2EC;
+  --indigo:    #2D3FC7;
+  --indigo-lt: #EEF0FB;
+  --indigo-md: #C5CBEF;
+  --orange:    #E8600A;
+  --orange-lt: #FEF0E7;
+  --green:     #1A7A4A;
+  --green-lt:  #E8F5EE;
+  --red:       #C0392B;
+  --red-lt:    #FDECEA;
+  --ink:       #1A1A2E;
+  --ink2:      #3D3D5C;
+  --ink3:      #7A7A9A;
+  --ink4:      #B0B0C8;
+  --mono:      'JetBrains Mono', monospace;
+  --body:      'IBM Plex Sans', sans-serif;
+  --display:   'Space Grotesk', sans-serif;
+  --r:         6px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 15px;
+  line-height: 1.75;
+}
+body::before {
+  content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 32px 32px;
+  opacity: .4;
+}
+
+.page { position: relative; z-index: 1; max-width: 960px; margin: 0 auto; padding: 0 2rem 6rem; }
+
+/* ── HERO ── */
+.hero {
+  padding: 4rem 0 2.5rem;
+  border-bottom: 2px solid var(--indigo);
+  margin-bottom: 2.5rem;
+  position: relative; overflow: hidden;
+}
+.hero-bracket {
+  position: absolute; right: -10px; top: 0;
+  font-family: var(--mono); font-size: clamp(130px,20vw,220px);
+  font-weight: 700; color: var(--indigo); opacity: .055;
+  line-height: 1; user-select: none; letter-spacing: -.05em;
+}
+.hero-eye {
+  font-family: var(--mono); font-size: 11px; font-weight: 500;
+  letter-spacing: .14em; text-transform: uppercase; color: var(--orange);
+  background: var(--orange-lt); border: 1px solid #F5C0A0;
+  border-radius: 4px; padding: 4px 12px; display: inline-block; margin-bottom: 1.2rem;
+}
+.hero h1 {
+  font-family: var(--display); font-size: clamp(2rem, 5vw, 3.4rem);
+  font-weight: 700; letter-spacing: -.03em; line-height: 1.08;
+  color: var(--ink); margin-bottom: .75rem;
+}
+.hero h1 em { font-style: normal; color: var(--orange); }
+.hero-desc { font-size: 14px; color: var(--ink3); font-weight: 300; max-width: 560px; }
+
+/* ── PROGRESS PANEL ── */
+.progress-panel {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px;
+  margin-bottom: 2rem;
+}
+.prog-card {
+  background: white; border: 1px solid var(--border); border-radius: var(--r);
+  padding: 1rem 1.25rem;
+}
+.prog-card .pc-label {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--ink4); margin-bottom: 6px;
+}
+.prog-card .pc-val {
+  font-family: var(--display); font-size: 28px; font-weight: 700; color: var(--ink);
+}
+.prog-card.c-total .pc-val { color: var(--indigo); }
+.prog-card.c-ok .pc-val { color: var(--green); }
+.prog-card.c-pend .pc-val { color: var(--orange); }
+
+.prog-bar-wrap { margin-bottom: 2rem; }
+.prog-bar-track {
+  height: 4px; background: var(--border); border-radius: 2px; overflow: hidden;
+}
+.prog-bar-fill {
+  height: 100%; background: linear-gradient(90deg, var(--indigo), var(--orange));
+  border-radius: 2px; transition: width .5s ease;
+}
+.prog-bar-label {
+  font-family: var(--mono); font-size: 11px; color: var(--ink4);
+  margin-top: 6px; text-align: right;
+}
+
+/* ── TABS ── */
+.tabs {
+  display: flex; gap: 3px; flex-wrap: wrap;
+  background: white; border: 1px solid var(--border);
+  border-radius: var(--r); padding: 5px; margin-bottom: 2rem;
+}
+.tab {
+  font-family: var(--mono); font-size: 11px; font-weight: 500;
+  letter-spacing: .04em; padding: 7px 14px; border-radius: 4px;
+  cursor: pointer; background: transparent; color: var(--ink4);
+  border: none; transition: all .15s; white-space: nowrap;
+}
+.tab:hover { color: var(--ink); background: var(--bg2); }
+.tab.active { color: white; background: var(--indigo); }
+
+/* ── SECTION ── */
+.sec { display: none; }
+.sec.active { display: block; }
+.sec-head {
+  display: flex; align-items: center; gap: 12px; margin-bottom: 1.75rem;
+}
+.sec-badge {
+  font-family: var(--mono); font-size: 11px; font-weight: 500;
+  padding: 4px 12px; border-radius: 4px;
+}
+.sec-head h2 {
+  font-family: var(--display); font-size: 1.25rem; font-weight: 600; color: var(--ink);
+}
+
+/* ── QUESTION CARD ── */
+.qcard {
+  background: white; border: 1px solid var(--border);
+  border-radius: var(--r); margin-bottom: 14px; overflow: hidden;
+  transition: border-color .2s, box-shadow .2s;
+}
+.qcard:hover { border-color: var(--indigo-md); box-shadow: 0 2px 12px rgba(45,63,199,.06); }
+.qcard.solved { border-left: 3px solid var(--green); }
+
+.qcard-top { padding: 18px 22px 0; }
+.qcard-meta {
+  display: flex; align-items: center; gap: 8px; margin-bottom: 10px;
+}
+.qcard-num {
+  font-family: var(--mono); font-size: 11px; font-weight: 700;
+  color: white; background: var(--indigo);
+  width: 26px; height: 26px; border-radius: 4px;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.qcard-tag {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .08em;
+  text-transform: uppercase; padding: 2px 8px; border-radius: 3px;
+}
+.qcard-diff {
+  font-family: var(--mono); font-size: 10px; color: var(--ink4); margin-left: auto;
+}
+.qcard-enun {
+  font-size: 14.5px; color: var(--ink2); font-weight: 300;
+  line-height: 1.7; margin-bottom: 14px; white-space: pre-line;
+}
+.qcard-enun code {
+  font-family: var(--mono); font-size: 12px;
+  background: var(--indigo-lt); color: var(--indigo);
+  border: 1px solid var(--indigo-md); border-radius: 3px; padding: 1px 5px;
+}
+.qcard-enun strong { font-weight: 500; color: var(--ink); }
+
+/* inline code block in question */
+.q-codeblock {
+  background: #1A1A2E;
+  border-radius: 4px;
+  padding: 12px 18px;
+  font-family: var(--mono); font-size: 13px; line-height: 1.7;
+  color: #C4C0E0; overflow-x: auto; white-space: pre;
+  margin-bottom: 14px;
+}
+.kw  { color: #7B95F5; }
+.tp  { color: #C7A9F5; }
+.str { color: #66D9B0; }
+.num { color: #F5C842; }
+.cm  { color: #4A4870; font-style: italic; }
+.fn  { color: #62C4F5; }
+
+/* actions row */
+.qcard-actions {
+  padding: 0 22px 16px;
+  display: flex; gap: 8px; flex-wrap: wrap; align-items: center;
+}
+.btn-gab {
+  font-family: var(--mono); font-size: 11px; font-weight: 500;
+  padding: 7px 16px; border-radius: 4px; cursor: pointer;
+  background: transparent; border: 1px solid var(--border);
+  color: var(--ink3); transition: all .15s;
+}
+.btn-gab:hover { background: var(--indigo-lt); color: var(--indigo); border-color: var(--indigo-md); }
+.btn-gab.open { background: var(--green-lt); color: var(--green); border-color: #A5D9B0; }
+.solved-badge {
+  font-family: var(--mono); font-size: 10px; color: var(--green);
+  background: var(--green-lt); border: 1px solid #A5D9B0;
+  border-radius: 3px; padding: 2px 8px; display: none;
+}
+.qcard.solved .solved-badge { display: inline-flex; }
+
+/* gabarito area */
+.gab-area { display: none; border-top: 1px solid var(--border); padding: 16px 22px; }
+.gab-area.open { display: block; }
+.gab-label {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--green); margin-bottom: 8px;
+}
+.gab-code {
+  background: #0D1A12;
+  border: 1px solid #1A4A30;
+  border-left: 3px solid var(--green);
+  border-radius: 0 4px 4px 0;
+  padding: 14px 18px;
+  font-family: var(--mono); font-size: 13px; line-height: 1.75;
+  color: #A8F0D4; overflow-x: auto; white-space: pre;
+}
+.gab-code .kw  { color: #7BAAF5; }
+.gab-code .tp  { color: #C7A9F5; }
+.gab-code .str { color: #66D9B0; }
+.gab-code .num { color: #F5C842; }
+.gab-code .cm  { color: #2A5A40; font-style: italic; }
+.gab-code .fn  { color: #62C4F5; }
+.gab-explain {
+  margin-top: 10px; font-size: 13.5px; color: var(--ink2);
+  font-weight: 300; line-height: 1.65;
+}
+.gab-explain strong { font-weight: 500; color: var(--ink); }
+.gab-explain code {
+  font-family: var(--mono); font-size: 12px;
+  background: var(--green-lt); color: var(--green);
+  padding: 1px 5px; border-radius: 3px;
+}
+
+/* ── FOOTER ── */
+.footer {
+  margin-top: 5rem; padding: 1.5rem 0;
+  border-top: 1px solid var(--border);
+  display: flex; justify-content: space-between; align-items: center;
+  flex-wrap: wrap; gap: 12px;
+  font-family: var(--mono); font-size: 11px; color: var(--ink4);
+}
+
+@media (max-width: 600px) {
+  .page { padding: 0 1.2rem 4rem; }
+  .progress-panel { grid-template-columns: repeat(3, 1fr); }
+}
+@media print {
+  body::before { display: none; }
+  .gab-area { display: block !important; }
+  .btn-gab, .tabs, .progress-panel, .prog-bar-wrap { display: none; }
+  .sec { display: block !important; }
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+<!-- HERO -->
+<header class="hero">
+  <div class="hero-bracket">[]</div>
+  <div class="hero-eye">Lista de exercícios · Vetores</div>
+  <h1>12 exercícios<br>de <em>arrays</em> em Java</h1>
+  <p class="hero-desc">Do acesso básico à ordenação por seleção — cada questão com gabarito comentado e explicação.</p>
+</header>
+
+<!-- PROGRESS -->
+<div class="progress-panel">
+  <div class="prog-card c-total"><div class="pc-label">Total</div><div class="pc-val" id="sc-total">12</div></div>
+  <div class="prog-card c-ok"><div class="pc-label">Vistos</div><div class="pc-val" id="sc-ok">0</div></div>
+  <div class="prog-card c-pend"><div class="pc-label">Restantes</div><div class="pc-val" id="sc-pend">12</div></div>
+</div>
+<div class="prog-bar-wrap">
+  <div class="prog-bar-track"><div class="prog-bar-fill" id="prog-fill" style="width:0%"></div></div>
+  <div class="prog-bar-label" id="prog-label">0 / 12 gabaritos vistos</div>
+</div>
+
+<!-- TABS -->
+<div class="tabs" id="tabs-el"></div>
+
+<!-- CONTENT -->
+<div id="content-el"></div>
+
+<footer class="footer">
+  <span>Java para Iniciantes · Exercícios de Vetores</span>
+  <span id="footer-date"></span>
+</footer>
+</div>
+
+<script>
+const GROUPS = [
+  {
+    id: "basico", label: "Básico", badge: "Fundamentos",
+    color: "#2D3FC7", bg: "#EEF0FB",
+    qs: [
+      {
+        n: "01", diff: "★☆☆", tag: "Declaração",
+        enun: "Declare um vetor de 5 inteiros chamado <code>numeros</code>, atribua os valores 10, 20, 30, 40 e 50 usando a sintaxe literal e imprima cada elemento com seu índice no formato: <code>numeros[0] = 10</code>.",
+        code: null,
+        gab: `<span class="kw">int</span>[] numeros = { <span class="num">10</span>, <span class="num">20</span>, <span class="num">30</span>, <span class="num">40</span>, <span class="num">50</span> };
+
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; numeros.length; i++) {
+    <span class="fn">System.out.println</span>(<span class="str">"numeros["</span> + i + <span class="str">"] = "</span> + numeros[i]);
+}`,
+        explain: "A sintaxe literal <code>{ ... }</code> inicializa o vetor direto. O <code>for</code> vai de <code>0</code> até <code>length - 1</code> (condição <code>&lt;</code>, não <code>&lt;=</code>)."
+      },
+      {
+        n: "02", diff: "★☆☆", tag: "Acesso",
+        enun: "Dado o vetor <code>int[] v = {5, 3, 8, 1, 9, 4, 7}</code>, imprima: o primeiro elemento, o último elemento (usando <code>length</code>) e o elemento central.",
+        code: null,
+        gab: `<span class="kw">int</span>[] v = { <span class="num">5</span>, <span class="num">3</span>, <span class="num">8</span>, <span class="num">1</span>, <span class="num">9</span>, <span class="num">4</span>, <span class="num">7</span> };
+
+<span class="fn">System.out.println</span>(<span class="str">"Primeiro: "</span> + v[<span class="num">0</span>]);
+<span class="fn">System.out.println</span>(<span class="str">"Último:   "</span> + v[v.length - <span class="num">1</span>]);
+<span class="fn">System.out.println</span>(<span class="str">"Central:  "</span> + v[v.length / <span class="num">2</span>]);`,
+        explain: "O último é sempre <code>v[v.length - 1]</code> — nunca hardcode o índice. O central de 7 elementos é o índice 3 (7/2 = 3 em divisão inteira)."
+      },
+      {
+        n: "03", diff: "★☆☆", tag: "Modificação",
+        enun: "Crie um vetor de 5 posições com <code>new int[5]</code>. Usando um laço <code>for</code>, preencha cada posição com o quadrado do seu índice (posição 0 = 0, posição 1 = 1, posição 2 = 4, ...). Depois imprima o vetor.",
+        code: null,
+        gab: `<span class="kw">int</span>[] quad = <span class="kw">new</span> <span class="kw">int</span>[<span class="num">5</span>];
+
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; quad.length; i++) {
+    quad[i] = i * i;
+}
+
+<span class="kw">for</span> (<span class="kw">int</span> n : quad) {
+    <span class="fn">System.out.print</span>(n + <span class="str">" "</span>);  <span class="cm">// 0 1 4 9 16</span>
+}`,
+        explain: "Primeiro loop escreve, segundo loop (for-each) lê. O for-each é suficiente aqui pois só precisamos imprimir os valores."
+      },
+    ]
+  },
+  {
+    id: "iteracao", label: "Iteração", badge: "Laços",
+    color: "#1A7A4A", bg: "#E8F5EE",
+    qs: [
+      {
+        n: "04", diff: "★☆☆", tag: "for-each",
+        enun: "Dado o vetor <code>String[] cidades = {\"São Paulo\", \"Rio\", \"Curitiba\", \"Salvador\", \"Fortaleza\"}</code>, imprima cada cidade em letras maiúsculas usando <code>for-each</code> e o método <code>.toUpperCase()</code>.",
+        code: null,
+        gab: `<span class="kw">String</span>[] cidades = { <span class="str">"São Paulo"</span>, <span class="str">"Rio"</span>, <span class="str">"Curitiba"</span>, <span class="str">"Salvador"</span>, <span class="str">"Fortaleza"</span> };
+
+<span class="kw">for</span> (<span class="kw">String</span> cidade : cidades) {
+    <span class="fn">System.out.println</span>(cidade.toUpperCase());
+}`,
+        explain: "For-each é ideal aqui: não precisa do índice e não modificamos o vetor original (String é imutável em Java)."
+      },
+      {
+        n: "05", diff: "★★☆", tag: "for indexado",
+        enun: "Dado <code>int[] v = {3, 7, 1, 9, 4, 6, 2, 8, 5}</code>, imprima os elementos dos <strong>índices ímpares</strong> (posições 1, 3, 5, 7...) e seus respectivos índices.",
+        code: null,
+        gab: `<span class="kw">int</span>[] v = { <span class="num">3</span>, <span class="num">7</span>, <span class="num">1</span>, <span class="num">9</span>, <span class="num">4</span>, <span class="num">6</span>, <span class="num">2</span>, <span class="num">8</span>, <span class="num">5</span> };
+
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">1</span>; i &lt; v.length; i += <span class="num">2</span>) {
+    <span class="fn">System.out.println</span>(<span class="str">"v["</span> + i + <span class="str">"] = "</span> + v[i]);
+}
+<span class="cm">// v[1]=7  v[3]=9  v[5]=6  v[7]=8</span>`,
+        explain: "Iniciamos em <code>i = 1</code> (primeiro índice ímpar) e incrementamos de 2 em 2. Só possível com for indexado."
+      },
+      {
+        n: "06", diff: "★★☆", tag: "Reverso",
+        enun: "Dado <code>int[] v = {10, 20, 30, 40, 50}</code>, imprima os elementos em ordem reversa sem criar um novo vetor.",
+        code: null,
+        gab: `<span class="kw">int</span>[] v = { <span class="num">10</span>, <span class="num">20</span>, <span class="num">30</span>, <span class="num">40</span>, <span class="num">50</span> };
+
+<span class="kw">for</span> (<span class="kw">int</span> i = v.length - <span class="num">1</span>; i >= <span class="num">0</span>; i--) {
+    <span class="fn">System.out.print</span>(v[i] + <span class="str">" "</span>);
+}
+<span class="cm">// 50 40 30 20 10</span>`,
+        explain: "Começamos em <code>v.length - 1</code> (último índice válido) e decrementamos até 0 inclusive. A condição é <code>i >= 0</code>."
+      },
+    ]
+  },
+  {
+    id: "operacoes", label: "Operações", badge: "Algoritmos",
+    color: "#E8600A", bg: "#FEF0E7",
+    qs: [
+      {
+        n: "07", diff: "★★☆", tag: "Soma/Média",
+        enun: "Dado <code>double[] notas = {7.5, 8.0, 6.5, 9.0, 5.5}</code>, calcule e imprima a soma e a média. Em seguida, imprima quantas notas estão acima da média.",
+        code: null,
+        gab: `<span class="kw">double</span>[] notas = { <span class="num">7.5</span>, <span class="num">8.0</span>, <span class="num">6.5</span>, <span class="num">9.0</span>, <span class="num">5.5</span> };
+
+<span class="kw">double</span> soma = <span class="num">0</span>;
+<span class="kw">for</span> (<span class="kw">double</span> n : notas) soma += n;
+<span class="kw">double</span> media = soma / notas.length;
+
+<span class="fn">System.out.println</span>(<span class="str">"Soma:  "</span> + soma);    <span class="cm">// 36.5</span>
+<span class="fn">System.out.println</span>(<span class="str">"Média: "</span> + media);   <span class="cm">// 7.3</span>
+
+<span class="kw">int</span> acimaDaMedia = <span class="num">0</span>;
+<span class="kw">for</span> (<span class="kw">double</span> n : notas) {
+    <span class="kw">if</span> (n > media) acimaDaMedia++;
+}
+<span class="fn">System.out.println</span>(<span class="str">"Acima da média: "</span> + acimaDaMedia);  <span class="cm">// 2</span>`,
+        explain: "Dois loops: o primeiro calcula soma e média, o segundo conta. Não dá pra fazer em um loop só porque precisamos da média calculada antes de comparar."
+      },
+      {
+        n: "08", diff: "★★☆", tag: "Maior/Menor",
+        enun: "Dado <code>int[] v = {4, 17, 3, 22, 8, 15, 1, 30, 9}</code>, encontre e imprima o maior e o menor valor, bem como seus índices no vetor.",
+        code: null,
+        gab: `<span class="kw">int</span>[] v = { <span class="num">4</span>, <span class="num">17</span>, <span class="num">3</span>, <span class="num">22</span>, <span class="num">8</span>, <span class="num">15</span>, <span class="num">1</span>, <span class="num">30</span>, <span class="num">9</span> };
+
+<span class="kw">int</span> iMaior = <span class="num">0</span>, iMenor = <span class="num">0</span>;
+
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">1</span>; i &lt; v.length; i++) {
+    <span class="kw">if</span> (v[i] > v[iMaior]) iMaior = i;
+    <span class="kw">if</span> (v[i] &lt; v[iMenor]) iMenor = i;
+}
+
+<span class="fn">System.out.println</span>(<span class="str">"Maior: v["</span> + iMaior + <span class="str">"] = "</span> + v[iMaior]);  <span class="cm">// v[7] = 30</span>
+<span class="fn">System.out.println</span>(<span class="str">"Menor: v["</span> + iMenor + <span class="str">"] = "</span> + v[iMenor]);  <span class="cm">// v[6] = 1</span>`,
+        explain: "Guardamos os <em>índices</em> do maior e menor, não os valores. Isso nos dá ambos — índice e valor — na hora de imprimir."
+      },
+      {
+        n: "09", diff: "★★☆", tag: "Busca",
+        enun: "Implemente uma <strong>busca linear</strong>: dado <code>int[] v = {12, 5, 33, 7, 28, 14, 9}</code> e o valor alvo <code>28</code>, imprima a posição onde foi encontrado. Se não existir, imprima <code>-1</code>. Não use <code>Arrays.binarySearch</code>.",
+        code: null,
+        gab: `<span class="kw">int</span>[] v = { <span class="num">12</span>, <span class="num">5</span>, <span class="num">33</span>, <span class="num">7</span>, <span class="num">28</span>, <span class="num">14</span>, <span class="num">9</span> };
+<span class="kw">int</span> alvo = <span class="num">28</span>;
+<span class="kw">int</span> posicao = -<span class="num">1</span>;
+
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; v.length; i++) {
+    <span class="kw">if</span> (v[i] == alvo) {
+        posicao = i;
+        <span class="kw">break</span>;   <span class="cm">// para ao encontrar</span>
+    }
+}
+
+<span class="fn">System.out.println</span>(posicao == -<span class="num">1</span>
+    ? <span class="str">"Não encontrado"</span>
+    : <span class="str">"Encontrado em v["</span> + posicao + <span class="str">"]"</span>);  <span class="cm">// v[4]</span>`,
+        explain: "Inicializamos <code>posicao = -1</code> como sentinela. O <code>break</code> evita percorrer o restante após encontrar — importante para eficiência."
+      },
+      {
+        n: "10", diff: "★★☆", tag: "Cópia",
+        enun: "Dado <code>int[] original = {1, 2, 3, 4, 5}</code>:\na) Faça uma cópia correta em <code>int[] copia</code>.\nb) Altere <code>copia[0] = 99</code> e comprove que <code>original[0]</code> não mudou.",
+        code: null,
+        gab: `<span class="kw">int</span>[] original = { <span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>, <span class="num">5</span> };
+<span class="kw">int</span>[] copia = <span class="kw">new</span> <span class="kw">int</span>[original.length];
+
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; original.length; i++) {
+    copia[i] = original[i];
+}
+
+copia[<span class="num">0</span>] = <span class="num">99</span>;
+
+<span class="fn">System.out.println</span>(<span class="str">"original[0] = "</span> + original[<span class="num">0</span>]);  <span class="cm">// 1  (não mudou!)</span>
+<span class="fn">System.out.println</span>(<span class="str">"copia[0]    = "</span> + copia[<span class="num">0</span>]);     <span class="cm">// 99</span>`,
+        explain: "<strong>Nunca use <code>b = a</code> para copiar vetores</strong> — você copia só a referência. Copiar elemento por elemento (ou <code>Arrays.copyOf</code>) cria um vetor independente."
+      },
+    ]
+  },
+  {
+    id: "avancado", label: "Avançado", badge: "Desafios",
+    color: "#6B2DC7", bg: "#F3EEFB",
+    qs: [
+      {
+        n: "11", diff: "★★★", tag: "Matriz",
+        enun: "Crie uma matriz 3×3 com os valores de 1 a 9 (linha por linha). Imprima a matriz formatada e calcule a soma da <strong>diagonal principal</strong> (elementos onde linha == coluna).",
+        code: null,
+        gab: `<span class="kw">int</span>[][] m = {
+    { <span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span> },
+    { <span class="num">4</span>, <span class="num">5</span>, <span class="num">6</span> },
+    { <span class="num">7</span>, <span class="num">8</span>, <span class="num">9</span> }
+};
+
+<span class="cm">// Imprimir matriz</span>
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; m.length; i++) {
+    <span class="kw">for</span> (<span class="kw">int</span> j = <span class="num">0</span>; j &lt; m[i].length; j++) {
+        <span class="fn">System.out.print</span>(m[i][j] + <span class="str">"\t"</span>);
+    }
+    <span class="fn">System.out.println</span>();
+}
+
+<span class="cm">// Diagonal principal: i == j</span>
+<span class="kw">int</span> diag = <span class="num">0</span>;
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; m.length; i++) {
+    diag += m[i][i];
+}
+<span class="fn">System.out.println</span>(<span class="str">"Diagonal: "</span> + diag);  <span class="cm">// 1+5+9 = 15</span>`,
+        explain: "Na diagonal principal, linha e coluna têm o mesmo índice (<code>i == j</code>). Por isso um único loop basta: <code>m[i][i]</code>."
+      },
+      {
+        n: "12", diff: "★★★", tag: "Ordenação",
+        enun: "Implemente o <strong>Selection Sort (ordenação por seleção)</strong> no vetor <code>{64, 25, 12, 22, 11}</code> sem usar <code>Arrays.sort()</code>. Imprima o vetor antes e depois. Explique no comentário o que cada iteração faz.",
+        code: null,
+        gab: `<span class="kw">int</span>[] v = { <span class="num">64</span>, <span class="num">25</span>, <span class="num">12</span>, <span class="num">22</span>, <span class="num">11</span> };
+
+<span class="cm">// Antes</span>
+<span class="fn">System.out.print</span>(<span class="str">"Antes:  "</span>);
+<span class="kw">for</span> (<span class="kw">int</span> n : v) <span class="fn">System.out.print</span>(n + <span class="str">" "</span>);
+<span class="fn">System.out.println</span>();
+
+<span class="cm">// Selection Sort:</span>
+<span class="cm">// A cada iteração de i, encontramos o menor a partir de i</span>
+<span class="cm">// e o trocamos com v[i], colocando-o em sua posição definitiva.</span>
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; v.length - <span class="num">1</span>; i++) {
+    <span class="kw">int</span> iMin = i;
+    <span class="kw">for</span> (<span class="kw">int</span> j = i + <span class="num">1</span>; j &lt; v.length; j++) {
+        <span class="kw">if</span> (v[j] &lt; v[iMin]) iMin = j;
+    }
+    <span class="cm">// Troca v[i] com v[iMin]</span>
+    <span class="kw">int</span> temp = v[i];
+    v[i]    = v[iMin];
+    v[iMin] = temp;
+}
+
+<span class="cm">// Depois</span>
+<span class="fn">System.out.print</span>(<span class="str">"Depois: "</span>);
+<span class="kw">for</span> (<span class="kw">int</span> n : v) <span class="fn">System.out.print</span>(n + <span class="str">" "</span>);
+<span class="cm">// 11 12 22 25 64</span>`,
+        explain: "<strong>Selection Sort</strong>: a cada passagem pelo loop externo (<code>i</code>), encontramos o menor elemento da parte não-ordenada e o colocamos em <code>v[i]</code>. A troca usa uma variável temporária <code>temp</code>. Complexidade O(n²)."
+      },
+    ]
+  }
+];
+
+let vistos = 0;
+const TOTAL = GROUPS.reduce((s, g) => s + g.qs.length, 0);
+
+// Build tabs
+const tabsEl = document.getElementById("tabs-el");
+const contentEl = document.getElementById("content-el");
+
+GROUPS.forEach((g, gi) => {
+  // tab
+  const btn = document.createElement("button");
+  btn.className = "tab" + (gi === 0 ? " active" : "");
+  btn.textContent = `${g.label} (${g.qs.length})`;
+  btn.onclick = () => switchTab(gi);
+  tabsEl.appendChild(btn);
+
+  // section
+  const sec = document.createElement("div");
+  sec.className = "sec" + (gi === 0 ? " active" : "");
+  sec.id = "sec" + gi;
+
+  let html = `<div class="sec-head">
+    <span class="sec-badge" style="background:${g.bg};color:${g.color}">${g.badge}</span>
+    <h2>${g.label}</h2>
+  </div>`;
+
+  g.qs.forEach((q, qi) => {
+    const gid = `gab-${gi}-${qi}`;
+    const bid = `btn-${gi}-${qi}`;
+    const cid = `card-${gi}-${qi}`;
+    const codeHtml = q.code
+      ? `<div class="q-codeblock">${q.code}</div>`
+      : '';
+
+    html += `<div class="qcard" id="${cid}">
+      <div class="qcard-top">
+        <div class="qcard-meta">
+          <div class="qcard-num">${q.n}</div>
+          <span class="qcard-tag" style="background:${g.bg};color:${g.color}">${q.tag}</span>
+          <span class="qcard-diff">${q.diff}</span>
+        </div>
+        <div class="qcard-enun">${q.enun}</div>
+      </div>
+      ${codeHtml}
+      <div class="qcard-actions">
+        <button class="btn-gab" id="${bid}" onclick="toggleGab('${gid}','${bid}','${cid}')">Ver gabarito</button>
+        <span class="solved-badge">✓ visto</span>
+      </div>
+      <div class="gab-area" id="${gid}">
+        <div class="gab-label">Gabarito</div>
+        <div class="gab-code">${q.gab}</div>
+        ${q.explain ? `<div class="gab-explain">${q.explain}</div>` : ''}
+      </div>
+    </div>`;
+  });
+
+  sec.innerHTML = html;
+  contentEl.appendChild(sec);
+});
+
+function switchTab(i) {
+  document.querySelectorAll(".sec").forEach((s, j) => s.classList.toggle("active", j === i));
+  document.querySelectorAll(".tab").forEach((t, j) => t.classList.toggle("active", j === i));
+}
+
+function toggleGab(gid, bid, cid) {
+  const g = document.getElementById(gid);
+  const b = document.getElementById(bid);
+  const c = document.getElementById(cid);
+  const opening = !g.classList.contains("open");
+  g.classList.toggle("open");
+  if (opening) {
+    b.textContent = "Ocultar"; b.classList.add("open");
+    c.classList.add("solved");
+    vistos = Math.min(vistos + 1, TOTAL);
+    updateProg();
+  } else {
+    b.textContent = "Ver gabarito"; b.classList.remove("open");
+  }
+}
+
+function updateProg() {
+  document.getElementById("sc-ok").textContent = vistos;
+  document.getElementById("sc-pend").textContent = TOTAL - vistos;
+  const pct = Math.round(vistos / TOTAL * 100);
+  document.getElementById("prog-fill").style.width = pct + "%";
+  document.getElementById("prog-label").textContent = `${vistos} / ${TOTAL} gabaritos vistos`;
+}
+
+document.getElementById("footer-date").textContent =
+  new Date().toLocaleDateString("pt-BR", { year:"numeric", month:"long", day:"numeric" });
+</script>
+</body>
+</html>
